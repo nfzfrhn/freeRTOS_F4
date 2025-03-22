@@ -22,7 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "FreeRTOS.h"
+#include "tasks.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,7 +61,8 @@ static void MX_SPI1_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
-
+void task1_handler(void* parameters);
+void task2_handler(void* parameters);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -76,7 +78,10 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	TaskHandle_t task1_handle;
+	TaskHandle_t task2_handle;
 
+	BaseType_t status;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -103,6 +108,27 @@ int main(void)
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
 
+  pxTaskCode1 = task1_Handler;					// Pointer to the task handler
+  pcName1 = "Task-1";							// Descriptive name to the task
+  uxStackDepth1 = 200;							// 200*32 bits
+  pvParameters1 = "Hello World from Task-1";	// Parameter to be passed
+  uxPriority1 = 2;
+
+  status = xTaskCreate(pxTaskCode1, pcName1, uxStackDepth1, pvParameters1, uxPriority1, &task1_handle);
+  configASSERT(status == pdPASS);
+
+  pxTaskCode2 = task1_Handler;					// Pointer to the task handler
+  pcName2 = "Task-1";							// Descriptive name to the task
+  uxStackDepth2 = 200;							// 200*32 bits
+  pvParameters2 = "Hello World from Task-2";	// Parameter to be passed
+  uxPriority2 = 2;
+
+  status = xTaskCreate(pxTaskCode2, pcName2, uxStackDepth2, pvParameters2, uxPriority2, &task2_handle);
+  configASSERT(status == pdPASS);
+
+  // Start the freeRTOS scheduler
+  vTaskStartScheduler();
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -365,7 +391,19 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void task1_handler(void* parameters){
 
+	while(1){
+		printf("%s\n",(char*)parameters);
+	}
+}
+
+void task2_handler(void* parameters){
+
+	while(1){
+		printf("%s\n",(char*)parameters);
+	}
+}
 /* USER CODE END 4 */
 
 /**
